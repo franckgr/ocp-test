@@ -44,6 +44,8 @@ func main() {
 
    var tlscert, tlskey string
 
+   // --- SSL Certificates
+
    flag.StringVar(&tlscert, "tlsCertFile", "/etc/certs/cert.pem", "File containing the x509 Certificate for HTTPS.")
    flag.StringVar(&tlskey, "tlsKeyFile", "/etc/certs/key.pem", "File containing the x509 private key to --tlsCertFile.")
    flag.Parse()
@@ -53,20 +55,44 @@ func main() {
       log.Fatal("Filed to load key pair: %v", err)
    }
 
-   server := &http.Server{
-     Addr:      ":8080",
-     TLSConfig: &tls.Config{Certificates: []tls.Certificate{certs}},
+   // --- TLS HTTP server configuration
+
+   tlsConfig := &tls.Config{
+      MinVersion:               tls.VersionTLS12,
+      PreferServerCipherSuites: true,
+      Certificates:             []tls.Certificate{certs},
+      CurvePreferences:         []tls.CurveID{
+                                   tls.CurveP521,
+                                   tls.CurveP384,
+                                   tls.CurveP256,
+                                },
+      CipherSuites:             []uint16{
+                                   tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+                                   tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+                                   tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+                                   tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+                                },
    }
 
+   // --- HTTP Mux definition
+
    validate := lbpValidate{}
+
    mux := http.NewServeMux()
    mux.HandleFunc("/validate", validate.serve)
    mux.HandleFunc("/headers",  headers)
    mux.HandleFunc("/healthz",  healthz)
    mux.HandleFunc("/readyz",   readyz)
    mux.HandleFunc("/annotate", annotate)
-   server.Handler = mux
 
+   // --- HTTP Server
+
+   server := &http.Server{
+     Addr:         ":8080",
+     Handler:      mux,
+     TLSConfig:    tlsConfig,
+     TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+   }
    log.Fatal(server.ListenAndServeTLS("",""))
 
 }
