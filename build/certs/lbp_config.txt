@@ -1,0 +1,32 @@
+[ req ]
+default_bits       = 2048
+default_md         = sha512
+default_keyfile    = ca.key
+prompt             = no
+encrypt_key        = yes
+
+# base request
+distinguished_name = req_distinguished_name
+
+# extensions
+req_extensions     = v3_req
+
+# distinguished_name
+[ req_distinguished_name ]
+countryName            = "FR"
+stateOrProvinceName    = "Paris"
+localityName           = "Paris"
+organizationName       = "lbp"
+organizationalUnitName = "lbp"
+commonName             = "lbp"
+emailAddress           = "no-reply@lbp"
+
+# req_extensions
+[ v3_req ]
+subjectAltName = @alt_names
+
+# Subjct alternative names
+[alt_names]
+DNS.1 = lbp
+DNS.2 = lbp.default.svc
+DNS.2 = lbp.default.svc.cluster.local

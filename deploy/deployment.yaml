@@ -1,0 +1,46 @@
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: lbp
+  namespace: default
+  labels:
+    name: lbp
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: lbp 
+      labels:
+        name: lbp
+    spec:
+      containers:
+        - name: webhook
+          image: franckgr/lbp-server:latest
+          imagePullPolicy: Always
+          args:
+            - -alsologtostderr
+            - --log_dir=/
+            - -v=10
+            - 2>&1
+          resources:
+            limits:
+              memory: 50Mi
+              cpu: 300m
+            requests:
+              memory: 100Mi
+              cpu: 300m
+          volumeMounts:
+            - name: webhook-certs
+              mountPath: /etc/certs
+              readOnly: true
+            - name: logs
+              mountPath: /tmp
+          securityContext:
+            readOnlyRootFilesystem: true
+      volumes:
+        - name: webhook-certs
+          secret:
+            secretName: lbp
+        - name: logs
+          emptyDir: {}
