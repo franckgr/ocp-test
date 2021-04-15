@@ -21,4 +21,7 @@ openssl x509 -req -in certs/lbp.csr -CA certs/ca.crt -CAkey certs/ca.key -CAcrea
 
 # INJECT CA IN THE WEBHOOK CONFIGURATION
 export CA_BUNDLE=$(cat certs/ca.crt | base64 | tr -d '\n')
+export LBP_KEY=$(cat certs/lbp-key.pem | base64 | tr -d '\n')
+export LBP_CRT=$(cat certs/lbp-crt.pem | base64 | tr -d '\n')
 cat ../deploy/ValidatingWebhookConfiguration.yaml.tmpl | envsubst > ../deploy/ValidatingWebhookConfiguration.yaml
+cat ../deploy/secret.yaml.tmpl | envsubst > ../deploy/secret.yaml

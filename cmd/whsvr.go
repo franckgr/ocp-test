@@ -58,8 +58,9 @@ func main() {
      TLSConfig: &tls.Config{Certificates: []tls.Certificate{certs}},
    }
 
+   validate := lbpValidate{}
    mux := http.NewServeMux()
-   mux.HandleFunc("/validate", validate)
+   mux.HandleFunc("/validate", validate.serve)
    mux.HandleFunc("/headers",  headers)
    mux.HandleFunc("/healthz",  healthz)
    mux.HandleFunc("/readyz",   readyz)

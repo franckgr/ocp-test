@@ -3,7 +3,7 @@ apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: lbp
-  namespace: default
+  namespace: lbp
   labels:
     name: lbp
 spec:
