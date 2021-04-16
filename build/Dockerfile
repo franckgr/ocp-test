@@ -19,8 +19,14 @@ COPY build/_output/linux/bin/lbp-server ${LBP_SERVER}
 RUN mkdir /licenses
 COPY LICENSE /licenses
 
-# set entrypoint
-ENTRYPOINT ["/usr/local/bin/lbp-server"]
+# copy certs
+RUN mkdir /etc/certs
+COPY build/certs/lbp-*.pem /etc/certs/
+RUN chmod 444 /etc/certs/lbp-*.pem
+
+# set entrypoint and port
+EXPOSE 8080
+ENTRYPOINT ["/usr/local/bin/lbp-server", "-tlsCertFile=/etc/certs/lbp-crt.pem", "-tlsKeyFile=/etc/certs/lbp-key.pem"]
 
 # switch to non-root user
 USER ${USER_UID}

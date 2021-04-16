@@ -6,6 +6,10 @@ import (
    "flag"
    "net/http"
    "crypto/tls"
+	"os"
+	"os/signal"
+	"syscall"
+	"context"
 )
 
 // --- HTTP Handlers
@@ -81,13 +85,24 @@ func main() {
    mux.HandleFunc("/annotate", annotate)
 
    // --- HTTP Server
-
    server := &http.Server{
-     Addr:         ":8080",
-     Handler:      mux,
-     TLSConfig:    tlsConfig,
-     TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
-   }
-   log.Fatal(server.ListenAndServeTLS("",""))
+                Addr:         ":8080",
+                Handler:      mux,
+                TLSConfig:    tlsConfig,
+                TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+             }
+
+   go func() {
+      log.Fatal(server.ListenAndServeTLS("",""))
+      return
+   }()
+
+	// listening shutdown singal
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+	<-signalChan
+
+	log.Println("Got shutdown signal, shutting down webhook server gracefully...")
+	server.Shutdown(context.Background())
 
 }
