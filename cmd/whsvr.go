@@ -6,15 +6,11 @@ import (
    "flag"
    "net/http"
    "crypto/tls"
-//   "os"
-//   "os/signal"
-//   "syscall"
-//   "context"
-
 )
 
-func validate(w http.ResponseWriter, req *http.Request) {
+// --- HTTP Handlers
 
+func validate(w http.ResponseWriter, req *http.Request) {
    fmt.Fprintf(w, "validate\n")
 }
 
@@ -27,7 +23,6 @@ func readyz(w http.ResponseWriter, req *http.Request) {
 }
 
 func annotate(w http.ResponseWriter, req *http.Request) {
-
    fmt.Fprintf(w, "vmware.com/nsx=true\n")
 }
 

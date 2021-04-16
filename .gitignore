@@ -15,7 +15,7 @@
 # vendor/
 
 # Go Path
-.go
+.go/
 
 # Build output
 build/_output
