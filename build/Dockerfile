@@ -1,5 +1,5 @@
 # FROM alpine:latest
-FROM ubi8-minimal:latest
+FROM registry.access.redhat.com/ubi8-minimal:latest
 
 # set labels for metadata
 LABEL maintainer="Franck Grosjean <fgrosjean@redhat.com>" \
