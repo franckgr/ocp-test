@@ -18,5 +18,5 @@
 .go/
 
 # Build output
-build/_output/
+# build/_output/
 test/
