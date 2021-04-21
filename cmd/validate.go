@@ -40,6 +40,7 @@ func (validate *lbpValidate) serve(w http.ResponseWriter, r *http.Request) {
    arRequest := v1beta1.AdmissionReview{}
    if err := json.Unmarshal(body, &arRequest); err != nil {
       log.Println("incorrect body")
+      log.Println(err)
       http.Error(w, "incorrect body", http.StatusBadRequest)
       return
    }
@@ -61,7 +62,7 @@ func (validate *lbpValidate) serve(w http.ResponseWriter, r *http.Request) {
       Response: &v1beta1.AdmissionResponse{
          Allowed: true,
          Result: &metav1.Status{
-            Message: "Keep calm and not add more crap in the cluster!",
+            Message: "Allow whatever it could be",
          },
       },
    }
