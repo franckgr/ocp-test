@@ -7,40 +7,55 @@ import (
    "net/http"
    "encoding/json"
 
+   "github.com/golang/glog"
+
    "k8s.io/api/admission/v1beta1"
    "k8s.io/api/core/v1"
    metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// lbpValidate listen to admission requests and serve responses
-type lbpValidate struct {
+
+type WebhookServer struct {
+   server *http.Server
 }
 
-func (validate *lbpValidate) serve(w http.ResponseWriter, r *http.Request) {
+// func (validate *lbpValidate) serve(w http.ResponseWriter, r *http.Request) {
+
+
+func (whsvr *WebhookServer) serve(w http.ResponseWriter, r *http.Request) {
    var body []byte
    if r.Body != nil {
       if data, err := ioutil.ReadAll(r.Body); err == nil {
-      body = data
+         body = data
       }
    }
 
+   // Verify Body is not empty
    if len(body) == 0 {
-      log.Fatal("empty body")
-      http.Error(w, "empty body", http.StatusBadRequest)
+      glog.Infof("glog body is empty")
+      http.Error(w, "{}", http.StatusBadRequest)
       return
+   } else {
+      glog.Infof("whsvr body:%v", body)
    }
-   log.Println("Received request")
 
-   if r.URL.Path != "/validate" {
-      log.Println("no validate")
-      http.Error(w, "no validate", http.StatusBadRequest)
-      return
+   // Verify Content-Type
+   contentType := r.Header.Get("Content-Type")
+   if contentType != "application/json" {
+      glog.Errorf("Content-Type=%s, expect application/json", contentType)
+      http.Error(w, "invalid Content-Type, expect `application/json`", http.StatusUnsupportedMediaType)
+   return
    }
+
+   // if r.URL.Path != "/validate" {
+   //    log.Println("no validate")
+   //    http.Error(w, "no validate", http.StatusBadRequest)
+   //    return
+   // }
 
    arRequest := v1beta1.AdmissionReview{}
    if err := json.Unmarshal(body, &arRequest); err != nil {
-      log.Println("incorrect body")
-      log.Println(err)
+      glog.Infof("Error parsing body:%v", err)
       http.Error(w, "incorrect body", http.StatusBadRequest)
       return
    }

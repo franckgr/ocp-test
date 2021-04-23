@@ -1,7 +1,6 @@
 package main
 
 import (
-   "fmt"
    "log"
    "flag"
    "net/http"
@@ -10,33 +9,18 @@ import (
 	"os/signal"
 	"syscall"
 	"context"
+
+   "github.com/golang/glog"
 )
 
 // --- HTTP Handlers
-
-func validate(w http.ResponseWriter, req *http.Request) {
-   fmt.Fprintf(w, "validate\n")
-}
-
-func healthz(w http.ResponseWriter, req *http.Request) {
-   fmt.Fprintf(w, "ok\n")
-}
-
-func readyz(w http.ResponseWriter, req *http.Request) {
-   fmt.Fprintf(w, "ok\n")
-}
-
-func annotate(w http.ResponseWriter, req *http.Request) {
-   fmt.Fprintf(w, "vmware.com/nsx=true\n")
-}
-
-func headers(w http.ResponseWriter, req *http.Request) {
-   for name, headers := range req.Header {
-      for _, h := range headers {
-         fmt.Fprintf(w, "%v: %v\n", name, h)
-      }
-   }
-}
+// func headers(w http.ResponseWriter, req *http.Request) {
+//    for name, headers := range req.Header {
+//       for _, h := range headers {
+//          fmt.Fprintf(w, "%v: %v\n", name, h)
+//       }
+//    }
+// }
 
 
 func main() {
@@ -44,7 +28,6 @@ func main() {
    var tlscert, tlskey string
 
    // --- SSL Certificates
-
    flag.StringVar(&tlscert, "tlsCertFile", "/etc/certs/cert.pem", "File containing the x509 Certificate for HTTPS.")
    flag.StringVar(&tlskey, "tlsKeyFile", "/etc/certs/key.pem", "File containing the x509 private key to --tlsCertFile.")
    flag.Parse()
@@ -55,7 +38,6 @@ func main() {
    }
 
    // --- TLS HTTP server configuration
-
    tlsConfig := &tls.Config{
       MinVersion:               tls.VersionTLS12,
       PreferServerCipherSuites: true,
@@ -73,28 +55,28 @@ func main() {
                                 },
    }
 
-   // --- HTTP Mux definition
-
-   validate := lbpValidate{}
-
-   mux := http.NewServeMux()
-   mux.HandleFunc("/validate", validate.serve)
-   mux.HandleFunc("/headers",  headers)
-   mux.HandleFunc("/healthz",  healthz)
-   mux.HandleFunc("/readyz",   readyz)
-   mux.HandleFunc("/annotate", annotate)
-
-   // --- HTTP Server
+   // --- Define HTTP Server
    server := &http.Server{
                 Addr:         ":8080",
-                Handler:      mux,
                 TLSConfig:    tlsConfig,
                 TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
              }
 
+   // Define Webhook server
+   whsvr := &WebhookServer{
+      server: server,
+   }
+
+   // --- Add Mux definition to HTTP server
+   mux := http.NewServeMux()
+   mux.HandleFunc("/validate", whsvr.serve)
+   whsvr.server.Handler = mux
+
+   // Start webhook server in new GO rountine
    go func() {
-      log.Fatal(server.ListenAndServeTLS("",""))
-      return
+      if err := whsvr.server.ListenAndServeTLS("", ""); err != nil {
+      glog.Errorf("Failed to listen and serve webhook server: %v", err)
+      }
    }()
 
 	// listening shutdown singal
@@ -102,7 +84,6 @@ func main() {
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 	<-signalChan
 
-	log.Println("Got shutdown signal, shutting down webhook server gracefully...")
-	server.Shutdown(context.Background())
-
+   glog.Infof("Got OS shutdown signal, shutting down webhook server gracefully...")
+   whsvr.server.Shutdown(context.Background())
 }
