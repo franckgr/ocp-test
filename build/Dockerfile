@@ -21,8 +21,8 @@ COPY LICENSE /licenses
 
 # copy certs
 RUN mkdir /etc/certs
-COPY build/certs/lbp-*.pem /etc/certs/
-RUN chmod 444 /etc/certs/lbp-*.pem
+COPY build/certs/lbp-*.pem build/certs/ca.crt /etc/certs/
+RUN chmod 444 /etc/certs/*
 
 # set entrypoint and port
 EXPOSE 8080
