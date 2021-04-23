@@ -18,7 +18,7 @@ stateOrProvinceName    = "Paris"
 localityName           = "Paris"
 organizationName       = "lbp"
 organizationalUnitName = "lbp"
-commonName             = "lbp"
+commonName             = "lbp-server"
 emailAddress           = "no-reply@lbp"
 
 # req_extensions
@@ -27,6 +27,6 @@ subjectAltName = @alt_names
 
 # Subjct alternative names
 [alt_names]
-DNS.1 = lbp
-DNS.2 = lbp.default.svc
-DNS.2 = lbp.default.svc.cluster.local
+DNS.1 = lbp-server
+DNS.2 = lbp-server.lbp.svc
+DNS.2 = lbp-server.lbp.svc.cluster.local
