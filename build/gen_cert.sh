@@ -14,7 +14,7 @@ openssl req -new -x509 -key certs/ca.key -out certs/ca.crt -config certs/lbp_con
 openssl genrsa -out certs/lbp-key.pem 2048
 
 # CREATE A CSR FROM THE CONFIGURATION FILE AND OUR PRIVATE KEY
-openssl req -new -key certs/lbp-key.pem -subj "/CN=lbp.default.svc" -out certs/lbp.csr -config certs/lbp_config.txt
+openssl req -new -key certs/lbp-key.pem -subj "/CN=lbp-server.default.svc" -out certs/lbp.csr -config certs/lbp_config.txt
 
 # CREATE THE CERT SIGNING THE CSR WITH THE CA CREATED BEFORE
 openssl x509 -req -in certs/lbp.csr -CA certs/ca.crt -CAkey certs/ca.key -CAcreateserial -out certs/lbp-crt.pem
