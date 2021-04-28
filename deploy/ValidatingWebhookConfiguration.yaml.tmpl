@@ -1,5 +1,5 @@
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: lbp
@@ -7,8 +7,8 @@ webhooks:
   - name: lbp
     clientConfig:
       service:
-        name: lbp
-        namespace: default
+        name: lbp-server
+        namespace: lbp
         path: "/validate"
       caBundle: "${CA_BUNDLE}"
     rules:
