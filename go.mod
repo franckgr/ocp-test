@@ -1,6 +1,6 @@
-module github.com/morvencao/kube-mutating-webhook-tutorial
+module github.com/lbp-server/lbp-server
 
-go 1.13
+go 1.14
 
 require (
 	github.com/PuerkitoBio/purell v1.1.0 // indirect
