@@ -26,7 +26,7 @@ emailAddress           = "no-reply@lbp"
 subjectAltName = @alt_names
 
 # Subjct alternative names
-[alt_names]
+[ alt_names ]
 DNS.1 = lbp-server
 DNS.2 = lbp-server.lbp.svc
 DNS.2 = lbp-server.lbp.svc.cluster.local
